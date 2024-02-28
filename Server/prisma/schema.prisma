@@ -33,7 +33,8 @@ model Event {
   City             String
   State            String
   ZipCode          Int
-  Details          String @db.Text
+  EventTitle       String
+  Details          String    @db.Text
   MaximumAttendies Int
   Picture          String?
   EventCreated     DateTime  @default(now())
