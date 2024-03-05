@@ -28,7 +28,7 @@ function Login() {
     try {
       let response= await fetch ("http://localhost:3000/api/user/login",{
         method: "POST",
-        header:{
+        headers:{
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

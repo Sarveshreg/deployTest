@@ -5,6 +5,7 @@ import Login from './UserComponent/Login'
 import Register from "./UserComponent/Register"
 import Createevent from './UserComponent/Createevent'
 import Profile from './UserComponent/Profile'
+import SingleEvent from './UserComponent/SingleEvent'
 
 function Maincontent() {
   return (
@@ -15,6 +16,7 @@ function Maincontent() {
             <Route path='/register' element={<Register/>}></Route>
             <Route path='/createevent' element={<Createevent/>}></Route>
             <Route path='/profile' element={<Profile/>}></Route>
+            <Route path='/event/:id' element={<SingleEvent/>}></Route>
         </Routes>
     </div>
   )
