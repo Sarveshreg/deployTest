@@ -60,7 +60,15 @@ apiRouter.use('/users',usersRouter);
 let eventsRouter=require("./events");
 apiRouter.use('/events',eventsRouter);
 
-apiRouter.use((error))
+apiRouter.use((error, req, res, next) => {
+    const status = error.status || 500;
+    const message = error.message || "Internal server error";
+    console.error(error); // Log the error for debugging purposes
+    res.status(status).json({
+        error: message,
+    });
+});
+
 
 
 
