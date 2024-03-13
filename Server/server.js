@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../.env' })
 let express =require("express");
 let app=express();
 let cors=require("cors");
@@ -25,6 +25,7 @@ app.get("/", (req,res)=>{
     res.json({message:"hello"})
 })
 
-app.listen(process.env.PORT, ()=>{
-    console.log("serving listening on port",process.env.PORT);
-})
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("Server listening on port", PORT);
+});
