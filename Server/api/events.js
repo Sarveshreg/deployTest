@@ -127,4 +127,25 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+   //add comment to a post
+    router.post("/:id/comment", async(req,res)=>{
+        let id=req.params.id;
+        let {
+            User_id,
+            Comment
+        }=req.body;
+        try {
+            let comm= await prisma.comment.create({
+                data:{
+                    Event_id:id,
+                    User_id:User_id,
+                    Comment:Comment
+                }
+            });
+            res.status(201).json(comm);
+        } catch (error) {
+            res.status(500).send(error.message);
+        }
+    })
+
 module.exports = router;
