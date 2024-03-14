@@ -102,21 +102,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.get("/user/:userId", async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const events = await prisma.event.findMany({
-      where: {
-        CreatorId: userId,
-      },
-    });
-    res.json(events);
-  } catch (error) {
-    console.error("Failed to retrieve events:", error);
-    res.status(500).send(error.message);
-  }
-});
-
 // Delete an event
 router.delete("/:id", async (req, res) => {
   try {
