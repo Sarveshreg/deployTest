@@ -38,7 +38,6 @@ router.get("/:id", async (req, res) => {
 // Create a new event
 router.post("/", async (req, res) => {
   const {
-    categoryId, // I am assuming this is the ID of the existing Category?
     date,
     street,
     city,
@@ -52,9 +51,6 @@ router.post("/", async (req, res) => {
   try {
     const event = await prisma.event.create({
       data: {
-        category: {
-          connect: { id: categoryId },
-        },
         Date: new Date(date),
         Street: street,
         City: city,
@@ -106,6 +102,21 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+router.get("/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const events = await prisma.event.findMany({
+      where: {
+        CreatorId: userId,
+      },
+    });
+    res.json(events);
+  } catch (error) {
+    console.error("Failed to retrieve events:", error);
+    res.status(500).send(error.message);
+  }
+});
+
 // Delete an event
 router.delete("/:id", async (req, res) => {
   try {
@@ -114,7 +125,7 @@ router.delete("/:id", async (req, res) => {
     });
     res.status(204).send("Event deleted successfully");
   } catch (error) {
-    // This checks if the error is related to foreign key constraint which prevents deletion
+    // This will check if the error is related to foreign key constraint which prevents deletion
     if (error.code === "P2003") {
       res
         .status(400)
