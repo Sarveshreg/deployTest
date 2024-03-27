@@ -1,25 +1,46 @@
 const express = require("express");
-const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const router = express.Router();
+const jwt = require("jsonwebtoken");
 
-// Middleware
-router.use((req, res, next) => {
-  console.log("Request to Event API received at ", Date.now());
-  next();
-});
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send("Access denied. No token provided.");
+  }
 
-// Get all events
+  const tokenParts = authHeader.split(" ");
+  if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+    return res
+      .status(400)
+      .send("Invalid token format. Expected 'Bearer <token>'.");
+  }
+
+  const token = tokenParts[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(401).send("Invalid token.");
+  }
+};
+
+// This route doesn't require authentication, to list all events publicly
 router.get("/", async (req, res) => {
   try {
     const events = await prisma.event.findMany();
     res.json(events);
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error("Error fetching events:", error);
+    res.status(500).json({ message: "Error fetching events." });
   }
 });
 
-// Get an event by ID
+// Get an event by ID - Public route
 router.get("/:id", async (req, res) => {
   try {
     const event = await prisma.event.findUnique({
@@ -35,8 +56,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Create a new event
-router.post("/", async (req, res) => {
+// Create a new event - this route requires authentication
+router.post("/", authMiddleware, async (req, res) => {
   const {
     date,
     street,
@@ -46,7 +67,6 @@ router.post("/", async (req, res) => {
     eventTitle,
     details,
     maximumAttendies,
-    creatorId,
   } = req.body;
   try {
     const event = await prisma.event.create({
@@ -59,89 +79,61 @@ router.post("/", async (req, res) => {
         EventTitle: eventTitle,
         Details: details,
         MaximumAttendies: maximumAttendies,
-        CreatorId: creatorId,
+        CreatorId: req.user.id,
       },
     });
     res.status(201).json(event);
   } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ message: "Error creating event." });
+  }
+});
+
+// Protected route to add a comment to an event
+router.post("/:id/comment", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { Comment } = req.body;
+  try {
+    const comment = await prisma.comment.create({
+      data: {
+        Event_id: id,
+        User_id: req.user.id,
+        Comment,
+      },
+    });
+    res.status(201).json(comment);
+  } catch (error) {
+    console.error("Error adding comment:", error);
     res.status(500).send(error.message);
   }
 });
 
-// Update an event
-router.put("/:id", async (req, res) => {
-  const {
-    category,
-    date,
-    street,
-    city,
-    state,
-    zipCode,
-    eventTitle,
-    details,
-    maximumAttendies,
-  } = req.body;
+// Update an event - this route requires authentication
+router.put("/:id", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
   try {
     const event = await prisma.event.update({
-      where: { id: req.params.id },
-      data: {
-        category,
-        Date: date ? new Date(date) : undefined,
-        Street: street,
-        City: city,
-        State: state,
-        ZipCode: zipCode,
-        EventTitle: eventTitle,
-        Details: details,
-        MaximumAttendies: maximumAttendies,
-      },
+      where: { id },
+      data: updates,
     });
     res.json(event);
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error("Error updating event:", error);
+    res.status(500).json({ message: "Error updating event." });
   }
 });
 
-// Delete an event
-router.delete("/:id", async (req, res) => {
+// Delete an event - this route requires authentication
+router.delete("/:id", authMiddleware, async (req, res) => {
+  const { id } = req.params;
   try {
-    await prisma.event.delete({
-      where: { id: req.params.id },
-    });
-    res.status(204).send("Event deleted successfully");
+    await prisma.event.delete({ where: { id } });
+    res.status(204).send();
   } catch (error) {
-    // This will check if the error is related to foreign key constraint which prevents deletion
-    if (error.code === "P2003") {
-      res
-        .status(400)
-        .send(
-          "Cannot delete this event because it is referenced by other records."
-        );
-    } else {
-      res.status(500).send(error.message);
-    }
+    console.error("Error deleting event:", error);
+    res.status(500).json({ message: "Error deleting event." });
   }
 });
-
-   //add comment to a post
-    router.post("/:id/comment", async(req,res)=>{
-        let id=req.params.id;
-        let {
-            User_id,
-            Comment
-        }=req.body;
-        try {
-            let comm= await prisma.comment.create({
-                data:{
-                    Event_id:id,
-                    User_id:User_id,
-                    Comment:Comment
-                }
-            });
-            res.status(201).json(comm);
-        } catch (error) {
-            res.status(500).send(error.message);
-        }
-    })
 
 module.exports = router;
