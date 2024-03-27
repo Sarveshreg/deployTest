@@ -28,7 +28,7 @@ function Createevent() {
     e.preventDefault();
     console.log(title, category, eventDate, eventTime, street, city, eventState, zipCode, maxAttendees,detail,picture)
     try {
-      let response= await fetch("http://localhost:3000/api/event",{
+      let response= await fetch("http://localhost:3000/api/events",{
         method: "POST",
         headers: {
           "Content-Type" : "application/json",

@@ -59,27 +59,37 @@ router.get("/:id", async (req, res) => {
 // Create a new event - this route requires authentication
 router.post("/", authMiddleware, async (req, res) => {
   const {
-    date,
-    street,
-    city,
-    state,
-    zipCode,
-    eventTitle,
-    details,
-    maximumAttendies,
+    Date,
+    Street,
+    City,
+    State,
+    ZipCode,
+    EventTitle,
+    Details,
+    Time,
+    MaximumAttendies,
+    Category,
+    Picture
   } = req.body;
+  DateTime=Date+"T"+Time+":00.000z"
   try {
     const event = await prisma.event.create({
       data: {
-        Date: new Date(date),
-        Street: street,
-        City: city,
-        State: state,
-        ZipCode: zipCode,
-        EventTitle: eventTitle,
-        Details: details,
-        MaximumAttendies: maximumAttendies,
-        CreatorId: req.user.id,
+        Date: DateTime,//new Date(date),
+        Street: Street,
+        City: City,
+        State: State,
+        ZipCode: parseInt(ZipCode),
+        EventTitle: EventTitle,
+        Details: Details,
+        Picture,
+        MaximumAttendies: parseInt(MaximumAttendies),
+        CreatorId: "1",         //change to be user.id once login is enabled on the frontend,
+        category:{
+          create:{
+            Category
+          }
+        }
       },
     });
     res.status(201).json(event);
