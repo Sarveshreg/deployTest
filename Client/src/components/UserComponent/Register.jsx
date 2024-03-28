@@ -22,9 +22,39 @@ function Register() {
   //handles form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // ********* Need API INFO: API Call to send formData Here
-    console.log('Submitting:', formData);
-    // ******* Need API INFO. Possibly something like: await apiCall('apiEndpoint/register', formData);
+    try {
+      // Convert ZipCode from string to integer
+      const payload = {
+        ...formData,
+        ZipCode: parseInt(formData.zipCode, 10) // Ensure ZipCode is an integer
+      };
+  
+      const response = await fetch('http://localhost:3000/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          FirstName: payload.firstName,
+          LastName: payload.lastName,
+          Email: payload.email,
+          Password: payload.password,
+          ZipCode: payload.ZipCode, // Use the converted ZipCode
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Registration Successful:', data);
+        // Additional actions upon successful registration
+      } else {
+        console.error('Registration Failed:', data);
+        // Handle failed registration
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Handle error in form submission
+    }
   };
 
 
