@@ -64,7 +64,7 @@ model RSVP {
 model Category {
   event    Event          @relation(fields: [Event_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Event_id String         @unique
-  Category CategoriesEnum
+  Category String
 
   @@id([Event_id, Category])
 }

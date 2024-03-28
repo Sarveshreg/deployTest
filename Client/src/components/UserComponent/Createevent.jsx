@@ -17,7 +17,7 @@ function Createevent() {
   let[city,setCity]=useState("");
   let[eventState,setEventState]=useState("");
   let[zipCode,setZipCode]=useState("");
-  let[maxAttendees,setMaxAttendees]=useState();
+  let[maxAttendees,setMaxAttendees]=useState(0);
   let[detail,setDetail]=useState("");
   let[picture,setPicture]=useState("");
 
@@ -44,7 +44,8 @@ function Createevent() {
           EventTitle: title,
           Details: detail,
           MaximumAttendies: maxAttendees,
-          Picture: picture
+          Picture: picture,
+          Time:eventTime
         })
       })
       let result= await response.json();

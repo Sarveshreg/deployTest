@@ -57,7 +57,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new event - this route requires authentication
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/",  async (req, res) => {         //add the auth middleware*******it was removed for testing
   const {
     Date,
     Street,
@@ -68,7 +68,7 @@ router.post("/", authMiddleware, async (req, res) => {
     Details,
     Time,
     MaximumAttendies,
-    Category,
+    category,
     Picture
   } = req.body;
   DateTime=Date+"T"+Time+":00.000z"
@@ -87,7 +87,7 @@ router.post("/", authMiddleware, async (req, res) => {
         CreatorId: "1",         //change to be user.id once login is enabled on the frontend,
         category:{
           create:{
-            Category
+            Category:category
           }
         }
       },
