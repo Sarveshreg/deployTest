@@ -26,14 +26,14 @@ function Login() {
 
     //make a call to the backend to login the user and get a token. Set the token in redux state
     try {
-      let response= await fetch ("http://localhost:3000/api/user/login",{
+      let response= await fetch ("http://localhost:3000/api/users/login",{
         method: "POST",
         headers:{
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email:email,
-          password: password
+          Email:email,
+          Password: password
         })
       })
       let result= await response.json();
