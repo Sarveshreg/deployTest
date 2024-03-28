@@ -22,6 +22,7 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
+    console.log(req.user);
     next();
   } catch (error) {
     console.error(error);
@@ -57,7 +58,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new event - this route requires authentication
-router.post("/",  async (req, res) => {         //add the auth middleware*******it was removed for testing
+router.post("/", authMiddleware, async (req, res) => {         
   const {
     Date,
     Street,
@@ -84,7 +85,7 @@ router.post("/",  async (req, res) => {         //add the auth middleware*******
         Details: Details,
         Picture,
         MaximumAttendies: parseInt(MaximumAttendies),
-        CreatorId: "1",         //change to be user.id once login is enabled on the frontend,
+        CreatorId: req.user.id,         //change to be user.id once login is enabled on the frontend,
         category:{
           create:{
             Category:category

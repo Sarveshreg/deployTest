@@ -21,7 +21,7 @@ function Createevent() {
   let[detail,setDetail]=useState("");
   let[picture,setPicture]=useState("");
 
-  let token="abc"; //remove this TEST!
+  let token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI1MmRjZTQ1LTMxN2UtNGU0Ni1iMDY4LWQxODZkYTAwZjQ4MyIsImlhdCI6MTcxMTY2Njc4NCwiZXhwIjoxNzExNzUzMTg0fQ.4YLPTCQCVHB_VIwRW45Fs4ntpCfbmSBExRMV1ae-KSw"; //remove this TEST!
 
   //define a function to call when the form is submitted
   async function EventSubmit(e){
