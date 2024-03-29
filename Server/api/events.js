@@ -46,6 +46,10 @@ router.get("/:id", async (req, res) => {
   try {
     const event = await prisma.event.findUnique({
       where: { id: req.params.id },
+      include:{
+        RSVPUsers: true,
+        Comment: true,
+      }
     });
     if (event) {
       res.json(event);
@@ -103,13 +107,15 @@ router.post("/", authMiddleware, async (req, res) => {
 // Protected route to add a comment to an event
 router.post("/:id/comment", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { Comment } = req.body;
+  const { Comment,User_fname} = req.body;
+
   try {
     const comment = await prisma.comment.create({
       data: {
         Event_id: id,
         User_id: req.user.id,
         Comment,
+        User_fname
       },
     });
     res.status(201).json(comment);
