@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../../features/auth/authSlice';
 
 function Login() {
 
@@ -7,6 +8,7 @@ function Login() {
   let[password,setPassword]=useState("");
   let[credentialError, setCredentialError]=useState(false);
   let[serverError, setServerError]=useState(false);
+  let dispatch = useDispatch();
 
 
   async function handleSubmit(e){
@@ -34,14 +36,24 @@ function Login() {
         body: JSON.stringify({
           Email:email,
           Password: password
-        })
-      })
+        }),
+      });
       let result= await response.json();
-      console.log("result",result);
+
+      if(response.ok) {
+        console.log("Login Successful:", result);
+        dispatch(setToken(result.token));
+      } else {
+        console.error("Login Failed:", result.message);
+        setServerError(true);
+      }
+
     } catch (error) {
       console.error("error:",error);
       setServerError(true);setPassword("");   //reset the password field
     }
+
+    setPassword("");
   }
 
 
