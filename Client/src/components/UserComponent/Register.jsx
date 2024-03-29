@@ -1,4 +1,7 @@
-import React, {useState} from 'react'
+import React, {useState} from 'react';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../../features/auth/authSlice';
+
 
 function Register() {
 
@@ -9,6 +12,8 @@ function Register() {
     password: '',
     zipCode: '',
   });
+
+  const dispatch = useDispatch();
 
   // handles changes to the form submission
   const handleChange = (e) => {
@@ -46,6 +51,7 @@ function Register() {
       const data = await response.json();
       if (response.ok) {
         console.log('Registration Successful:', data);
+        dispatch(setToken(data.token));
         // Additional actions upon successful registration
       } else {
         console.error('Registration Failed:', data);
