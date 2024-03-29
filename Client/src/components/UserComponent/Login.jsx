@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setToken } from '../../features/auth/authSlice';
+import { useSelector,useDispatch } from 'react-redux';
+import { setToken,setFirstName,setId } from '../../features/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
 
@@ -9,6 +10,7 @@ function Login() {
   let[credentialError, setCredentialError]=useState(false);
   let[serverError, setServerError]=useState(false);
   let dispatch = useDispatch();
+  let navigate=useNavigate();
 
 
   async function handleSubmit(e){
@@ -43,6 +45,9 @@ function Login() {
       if(response.ok) {
         console.log("Login Successful:", result);
         dispatch(setToken(result.token));
+        dispatch(setFirstName(result.user.FirstName));
+        dispatch(setId(result.user.id));
+        navigate("/",{replace:true})
       } else {
         console.error("Login Failed:", result.message);
         setServerError(true);
