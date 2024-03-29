@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../../features/auth/authSlice';
+import { setToken,setFirstName,setId } from '../../features/auth/authSlice';
 
 
 function Register() {
@@ -52,6 +52,9 @@ function Register() {
       if (response.ok) {
         console.log('Registration Successful:', data);
         dispatch(setToken(data.token));
+        dispatch(setFirstName(data.user.FirstName));
+        dispatch(setId(data.user.id));
+        
         // Additional actions upon successful registration
       } else {
         console.error('Registration Failed:', data);
