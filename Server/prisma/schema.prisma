@@ -48,6 +48,7 @@ model Event {
 model RSVP {
   users   Users  @relation(fields: [userID], references: [id])
   userID  String
+  User_fname  String?
   event   Event  @relation(fields: [eventID], references: [id])
   eventID String
 
@@ -86,6 +87,7 @@ model Comment {
   Event_id   String
   user       Users    @relation(fields: [User_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   User_id    String
+  User_fname  String
   Comment    String
   Created_at DateTime @default(now())
 }

@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { useDispatch } from 'react-redux';
 import { setToken,setFirstName,setId } from '../../features/auth/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 
 function Register() {
@@ -14,6 +15,7 @@ function Register() {
   });
 
   const dispatch = useDispatch();
+  let navigate=useNavigate();
 
   // handles changes to the form submission
   const handleChange = (e) => {
@@ -54,7 +56,7 @@ function Register() {
         dispatch(setToken(data.token));
         dispatch(setFirstName(data.user.FirstName));
         dispatch(setId(data.user.id));
-        
+        navigate("/",{replace:true});
         // Additional actions upon successful registration
       } else {
         console.error('Registration Failed:', data);
