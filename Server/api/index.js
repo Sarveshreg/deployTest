@@ -6,6 +6,7 @@ const { getUserById } = require("./utilities");
 const JWT_SECRET = process.env.JWT_SECRET;
 const usersRouter = require("./users");
 const eventsRouter = require("./events");
+const rsvpRouter = require("./rsvp");
 
 const apiRouter = express.Router();
 const app = express();
@@ -13,6 +14,7 @@ const app = express();
 // Your other routes and middleware here
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/events", eventsRouter);
+apiRouter.use("/rsvp", rsvpRouter);
 
 // Error handling middleware
 apiRouter.use((error, req, res, next) => {

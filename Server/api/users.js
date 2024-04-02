@@ -62,7 +62,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Authentication failed." });
     }
     const token = generateToken(user);
-    res.json({ token,user: { ...user, Password: undefined }});
+    res.json({ token, user: { ...user, Password: undefined } });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "An error occurred during login." });

@@ -46,10 +46,10 @@ router.get("/:id", async (req, res) => {
   try {
     const event = await prisma.event.findUnique({
       where: { id: req.params.id },
-      include:{
+      include: {
         RSVPUsers: true,
         Comment: true,
-      }
+      },
     });
     if (event) {
       res.json(event);
@@ -62,7 +62,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new event - this route requires authentication
-router.post("/", authMiddleware, async (req, res) => {         
+router.post("/", authMiddleware, async (req, res) => {
   const {
     Date,
     Street,
@@ -74,13 +74,13 @@ router.post("/", authMiddleware, async (req, res) => {
     Time,
     MaximumAttendies,
     category,
-    Picture
+    Picture,
   } = req.body;
-  DateTime=Date+"T"+Time+":00.000z"
+  DateTime = Date + "T" + Time + ":00.000z";
   try {
     const event = await prisma.event.create({
       data: {
-        Date: DateTime,//new Date(date),
+        Date: DateTime, //new Date(date),
         Street: Street,
         City: City,
         State: State,
@@ -89,12 +89,12 @@ router.post("/", authMiddleware, async (req, res) => {
         Details: Details,
         Picture,
         MaximumAttendies: parseInt(MaximumAttendies),
-        CreatorId: req.user.id,         //change to be user.id once login is enabled on the frontend,
-        category:{
-          create:{
-            Category:category
-          }
-        }
+        CreatorId: req.user.id, //change to be user.id once login is enabled on the frontend,
+        category: {
+          create: {
+            Category: category,
+          },
+        },
       },
     });
     res.status(201).json(event);
@@ -107,7 +107,7 @@ router.post("/", authMiddleware, async (req, res) => {
 // Protected route to add a comment to an event
 router.post("/:id/comment", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { Comment,User_fname} = req.body;
+  const { Comment, User_fname } = req.body;
 
   try {
     const comment = await prisma.comment.create({
@@ -115,7 +115,7 @@ router.post("/:id/comment", authMiddleware, async (req, res) => {
         Event_id: id,
         User_id: req.user.id,
         Comment,
-        User_fname
+        User_fname,
       },
     });
     res.status(201).json(comment);
