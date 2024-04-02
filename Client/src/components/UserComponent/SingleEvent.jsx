@@ -2,6 +2,7 @@ import React from 'react'
 import { useEffect,useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {useSelector,useDispatch} from "react-redux"
+import { useNavigate } from 'react-router-dom';
 
 function SingleEvent() {
     let {id}=useParams();
@@ -11,6 +12,7 @@ function SingleEvent() {
     let[eventDetail,setEventDetail]=useState({});
     let[userComment,setUserComment]=useState(null);
     let commentError=false;
+    let navigate = useNavigate();
 
     useEffect(()=>{
       let detail=async()=>{
@@ -24,7 +26,7 @@ function SingleEvent() {
           console.log(data);
         }
       };
-      detail()
+      detail();
     },[userComment])
 
     let sendRsvp= async ()=>{
@@ -58,12 +60,32 @@ function SingleEvent() {
       }
     }
 
+    let deleteEvent=async()=>{
+      console.log("event deleted",id)
+      try {
+        let response= await fetch(`http://localhost:3000/api/events/${id}`,{
+          method:"DELETE",
+          headers:{
+            "Content-Type" : "application/json",
+            "Authorization" : `Bearer ${token}`     //provide the token 
+          },
+          })
+          let result=await response.json();
+          if(result.result){
+            navigate(`/profile`,{replace:true});
+          }
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
 
   return (
     <div>
         {eventDetail && 
         <span>
-          <h2>{eventDetail.EventTitle}</h2>
+          <div><strong>{eventDetail.EventTitle}</strong>{(userId==eventDetail.CreatorId) &&<button onClick={(e)=>deleteEvent()}>Delete</button>}</div>
           <img src="https://www.discoverhongkong.com/content/dam/dhk/intl/what-s-new/events/events-festivals-720x860.jpg" alt="picture of an event" width={400} height={400} />
           <p><strong>Detail:</strong> {eventDetail.Details}</p>
           <span><strong>Location: </strong>

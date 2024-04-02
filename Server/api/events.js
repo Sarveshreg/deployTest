@@ -144,9 +144,11 @@ router.put("/:id", authMiddleware, async (req, res) => {
 // Delete an event - this route requires authentication
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
+  console.log("id",id);
   try {
-    await prisma.event.delete({ where: { id } });
-    res.status(204).send();
+    let c=await prisma.event.delete({ where: { id } });
+    console.log("c",c);
+    return res.status(201).json({result:"true"});
   } catch (error) {
     console.error("Error deleting event:", error);
     res.status(500).json({ message: "Error deleting event." });
