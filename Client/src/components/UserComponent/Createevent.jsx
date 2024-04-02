@@ -63,6 +63,12 @@ function Createevent() {
     }
   }
 
+  if(!token){
+    return(
+      <h2>Login or register to create event</h2>
+    )
+  }
+
 
   return (
 

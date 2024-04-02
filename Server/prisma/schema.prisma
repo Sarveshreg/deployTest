@@ -46,10 +46,10 @@ model Event {
 }
 
 model RSVP {
-  users   Users  @relation(fields: [userID], references: [id])
+  users   Users  @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userID  String
   User_fname  String?
-  event   Event  @relation(fields: [eventID], references: [id])
+  event   Event  @relation(fields: [eventID], references: [id],  onDelete: Cascade, onUpdate: Cascade)
   eventID String
 
   @@id([userID, eventID])
