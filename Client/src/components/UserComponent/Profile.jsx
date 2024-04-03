@@ -6,7 +6,10 @@ import { useNavigate } from "react-router-dom";
 function Profile() {
   let [profileData, setProfileData] = useState(null);
   let [createdEvents, setCreatedEvents] = useState(null);
+  let [RsvpEvents, setRsvpEvents] = useState(null);
   let [error, setError] = useState(null);
+  let [rsvpError, setRsvpError] = useState(false);
+  let [rsvpCancel, setRsvpCancel] = useState(false);
   let token=useSelector((state)=>state.auth.token);
   let id=useSelector((state)=>state.auth.id);
   let navigate = useNavigate();
@@ -46,17 +49,63 @@ function Profile() {
       }
     };
 
+    const fetchRsvpEvent = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/rsvp`,{
+          method: "GET",
+        headers: {
+          "Content-Type" : "application/json",
+          "Authorization" : `Bearer ${token}`     //provide the token 
+        }}); 
+        let data=await response.json();
+        console.log("rsvp",data)
+        if(!data.message){
+          setRsvpEvents(data);
+        }
+      } catch (error) {
+        setError(error.message || 'Failed to fetch user profile');
+      }
+    };
+
     fetchProfileData();
     fetchCreatedEvents();
+    fetchRsvpEvent();
 
     return () => {
       
     };
-  }, []);
+  }, [rsvpError,rsvpCancel]);
 
   let eventDetail=(n)=>{
     console.log("showing single event detail",n)
     navigate(`/event/${n}`)
+  }
+
+  let cancelRsvp= async (eventId)=>{
+    setRsvpError(true);
+    console.log("rsvp cancelled for",eventId);
+    try {
+      let response= await fetch(`http://localhost:3000/api/rsvp/${eventId}`,{
+      method:"DELETE",
+      headers:{
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${token}`     //provide the token 
+      },
+      })
+      let result=await response.json();
+      console.log("result of cancel",result)
+      if(result.eventID==eventId){
+        console.log("event rsvp cancelled");
+        setRsvpError(false);
+        setRsvpCancel(true);
+      }
+      else{
+        //
+      }
+      
+    } catch (error) {
+        console.error(error);
+    }
   }
 
   if(!token){
@@ -81,17 +130,20 @@ function Profile() {
           <ul>
             {!createdEvents && <p>NO Event Created!</p>}
             {createdEvents && createdEvents.map(event => (
-              <li key={event.id}>{event.EventTitle} <button onClick={(e)=>eventDetail(event.id)}>Detail</button><button>Delete</button></li>
+              <li key={event.id}>{event.EventTitle} <button onClick={(e)=>eventDetail(event.id)}>Detail</button></li>
             ))}
           </ul>
 
           {/* Display events RSVP'd */}
           <h3>Events RSVP'd</h3>
-          {/* <ul>
-            {profileData.eventsRSVPd.map(event => (
-              <li key={event.id}>{event.name}</li>
+          {rsvpError && <p>Unable to cancel RSVP!</p>}
+          {rsvpCancel && <p>RSVP Cancelled!</p>}
+          <ul>
+            {!createdEvents && <p>NO Event Created!</p>}
+            {RsvpEvents && RsvpEvents.map(event => (
+              <li key={event.eventID}>{event.event.EventTitle} <button onClick={(e)=>eventDetail(event.eventID)}>Detail</button><button onClick={(e)=>{cancelRsvp(event.eventID)}}>Cancel RSVP</button></li>
             ))}
-          </ul> */}
+          </ul>
 
           {/* Display current connections */}
           <h3>Current Connections</h3>

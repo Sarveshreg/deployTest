@@ -17,6 +17,7 @@ const authMiddleware = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
+    console.log("req.user",req.user)
     next();
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized. Invalid token." });
@@ -27,14 +28,16 @@ const authMiddleware = async (req, res, next) => {
 router.post("/:eventId", authMiddleware, async (req, res) => {
   const { eventId } = req.params;
   const userId = req.user.id;
-
+  let {User_fname}=req.body
   try {
     const rsvp = await prisma.RSVP.create({
       data: {
         userID: userId,
         eventID: eventId,
+        User_fname
       },
     });
+    console.log("rsvp",rsvp)
     res.status(201).json(rsvp);
   } catch (error) {
     console.error("RSVP error:", error);
@@ -64,7 +67,7 @@ router.delete("/:eventId", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    await prisma.RSVP.delete({
+    let result=await prisma.RSVP.delete({
       where: {
         userID_eventID: {
           userID: userId,
@@ -72,7 +75,8 @@ router.delete("/:eventId", authMiddleware, async (req, res) => {
         },
       },
     });
-    res.status(204).send();
+    console.log(result)
+    res.json(result);
   } catch (error) {
     console.error("Cancel RSVP error:", error);
     res.status(500).json({ message: "Error cancelling RSVP." });
