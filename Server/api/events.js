@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const sendMail=require("./email");
 
 const authMiddleware = require("./authMiddleware");
 
@@ -52,6 +53,8 @@ router.post("/", authMiddleware, async (req, res) => {
     MaximumAttendies,
     category,
     Picture,
+    CreatorName,
+    CreatorEmail
   } = req.body;
   const DateTime = Date + "T" + Time + ":00.000z";
 
@@ -87,6 +90,8 @@ router.post("/", authMiddleware, async (req, res) => {
         EventTitle,
         Details,
         Picture,
+        CreatorEmail,
+        CreatorName,
         MaximumAttendies: parseInt(MaximumAttendies),
         CreatorId: req.user.id,
         category: {
@@ -100,7 +105,7 @@ router.post("/", authMiddleware, async (req, res) => {
         LocationDisplay: address,
       },
     });
-
+    sendMail(event,"New Event");    
     res.status(201).json(event);
   } catch (error) {
     console.error("Error creating event with geocoding:", error);
@@ -150,8 +155,9 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   console.log("id", id);
   try {
-    let c = await prisma.event.delete({ where: { id } });
-    console.log("c", c);
+    let event = await prisma.event.delete({ where: { id } });
+    console.log("c", event);
+    sendMail(event,"Delete Event");
     return res.status(201).json({ result: "true" });
   } catch (error) {
     console.error("Error deleting event:", error);

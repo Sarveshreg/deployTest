@@ -6,7 +6,7 @@ function Home() {
   return (
     <>
     <div>Thiis the Home page</div>
-    <button onClick={(e)=>navigate(`/event/937794fd-f796-43c1-a5bd-d8daed72b8a7`)}>test</button>
+    <button onClick={(e)=>navigate(`/event/affd58bb-1b56-4b04-968f-2440caea8dd2`)}>test</button>
     </>
   )
 }

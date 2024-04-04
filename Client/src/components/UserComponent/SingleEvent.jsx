@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 
 function SingleEvent() {
     let {id}=useParams();
-    let userId=useSelector((state)=>state.auth.id);
-    let User_fname=useSelector((state)=>state.auth.firstname);
+    let userId=useSelector((state)=>state.auth.user.id);
+    let User_fname=useSelector((state)=>state.auth.user.FirstName);
+    let UserEmail=useSelector((state)=>state.auth.user.Email);
     let token=useSelector((state)=>state.auth.token);
     let[eventDetail,setEventDetail]=useState({});
     //let[userComment,setUserComment]=useState(null);
@@ -67,6 +68,9 @@ function SingleEvent() {
         },
         body:JSON.stringify({
           User_fname,
+          UserEmail,
+          EventTitle:eventDetail.EventTitle,
+
         })
         })
         let result=await response.json();
@@ -91,6 +95,9 @@ let cancelRsvp= async ()=>{
       "Content-Type" : "application/json",
       "Authorization" : `Bearer ${token}`     //provide the token 
     },
+    body:JSON.stringify({
+      EventTitle:eventDetail.EventTitle,
+    })
     })
     let result=await response.json();
     console.log("result of cancel",result)
@@ -164,8 +171,8 @@ let cancelRsvp= async ()=>{
           <img src="https://www.discoverhongkong.com/content/dam/dhk/intl/what-s-new/events/events-festivals-720x860.jpg" alt="picture of an event" width={400} height={400} />
           <p><strong>Detail:</strong> {eventDetail.Details}</p>
           <span><strong>Location: </strong>
-              <span> {eventDetail.Street}</span>
-              <p><span>{eventDetail.State} {eventDetail.ZipCode}</span></p>
+              <div> {eventDetail.LocationDisplay}</div>
+              
           </span>
           <p><strong>Date and Time:</strong> {eventDetail.Date}</p>
           <p><strong>Maximum Attendees:</strong> {eventDetail.MaximumAttendies}</p>
@@ -178,6 +185,7 @@ let cancelRsvp= async ()=>{
               {!RsvpDisable && <button onClick={(e)=>{sendRsvp()}}> RSVP</button>}
               {cancelBtn && <button onClick={(e)=>{cancelRsvp()}}> Cancel RSVP</button>}
             </span>}
+          <p><strong>Created By: </strong>{eventDetail.CreatorName}</p>
 
           <div>
             <div><strong>People attending this event ({eventDetail.RSVPUsers && <span>{eventDetail.RSVPUsers.length}</span>}):</strong></div>

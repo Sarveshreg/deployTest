@@ -11,7 +11,7 @@ function Profile() {
   let [rsvpError, setRsvpError] = useState(false);
   let [rsvpCancel, setRsvpCancel] = useState(false);
   let token=useSelector((state)=>state.auth.token);
-  let id=useSelector((state)=>state.auth.id);
+  let id=useSelector((state)=>state.auth.user.id);
   let navigate = useNavigate();
 
   useEffect(() => {
