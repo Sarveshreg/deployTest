@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id           String    @id @default(uuid())
+  FirstName    String
+  LastName     String
+  Email        String    @unique
+  Password     String
+  ZipCode      Int
+  EventCreated Event[]   @relation("creator")
+  comment      Comment[]
+  RSVPEvents   RSVP[]
+}
+
+model Event {
+  id               String    @id @default(uuid())
+  category         Category?
+  Date             DateTime
+  Street           String
+  City             String
+  State            String
+  ZipCode          Int
+  EventTitle       String
+  Details          String    @db.Text
+  MaximumAttendies Int
+  Picture          String?
+  EventCreated     DateTime  @default(now())
+  EventUpdated     DateTime  @updatedAt
+  Creator          Users     @relation("creator", fields: [CreatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  CreatorId        String
+  Comment          Comment[]
+  RSVPUsers        RSVP[]
+}
+
+model RSVP {
+  users   Users  @relation(fields: [userID], references: [id])
+  userID  String
+  event   Event  @relation(fields: [eventID], references: [id])
+  eventID String
+
+  @@id([userID, eventID])
+}
+
+// model RSVP{
+//   id    String     @id @default(uuid())
+//   event Event @relation(fields: [Event_id],references: [id],onDelete: Cascade,onUpdate: Cascade)
+//   Event_id String @unique
+//   Attendies String[]
+// }
+
+model Category {
+  event    Event          @relation(fields: [Event_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Event_id String         @unique
+  Category CategoriesEnum
+
+  @@id([Event_id, Category])
+}
+
+enum CategoriesEnum {
+  ARTS
+  SCIENCE
+  SPORTS
+  TRAVEL
+  FOOD
+  MUSICS
+  RELIGIOUS
+  POLITICAL
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  event      Event    @relation(fields: [Event_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Event_id   String
+  user       Users    @relation(fields: [User_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User_id    String
+  Comment    String
+  Created_at DateTime @default(now())
+}
