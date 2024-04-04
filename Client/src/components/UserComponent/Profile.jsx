@@ -139,7 +139,6 @@ function Profile() {
           {rsvpError && <p>Unable to cancel RSVP!</p>}
           {rsvpCancel && <p>RSVP Cancelled!</p>}
           <ul>
-            {!createdEvents && <p>NO Event Created!</p>}
             {RsvpEvents && RsvpEvents.map(event => (
               <li key={event.eventID}>{event.event.EventTitle} <button onClick={(e)=>eventDetail(event.eventID)}>Detail</button><button onClick={(e)=>{cancelRsvp(event.eventID)}}>Cancel RSVP</button></li>
             ))}
