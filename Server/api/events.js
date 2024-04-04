@@ -3,32 +3,9 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).send("Access denied. No token provided.");
-  }
-
-  const tokenParts = authHeader.split(" ");
-  if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
-    return res
-      .status(400)
-      .send("Invalid token format. Expected 'Bearer <token>'.");
-  }
-
-  const token = tokenParts[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    console.log(req.user);
-    next();
-  } catch (error) {
-    console.error(error);
-    res.status(401).send("Invalid token.");
-  }
-};
+const authMiddleware = require("./authMiddleware");
 
 // This route doesn't require authentication, to list all events publicly
 router.get("/", async (req, res) => {
@@ -76,30 +53,57 @@ router.post("/", authMiddleware, async (req, res) => {
     category,
     Picture,
   } = req.body;
-  DateTime = Date + "T" + Time + ":00.000z";
+  const DateTime = Date + "T" + Time + ":00.000z";
+
+  // Combine address components
+  const address = `${Street}, ${City}, ${State}, ${ZipCode}`;
+
   try {
+    // Use the geocoding API to get latitude and longitude for the address
+    const geoResponse = await axios.get(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        address
+      )}`
+    );
+    const [geoData] = geoResponse.data;
+
+    if (!geoData) {
+      return res
+        .status(404)
+        .json({ message: "Address not found for geocoding." });
+    }
+
+    // Extract latitude and longitude
+    const latitude = parseFloat(geoData.lat);
+    const longitude = parseFloat(geoData.lon);
+
     const event = await prisma.event.create({
       data: {
-        Date: DateTime, //new Date(date),
-        Street: Street,
-        City: City,
-        State: State,
+        Date: DateTime,
+        Street,
+        City,
+        State,
         ZipCode: parseInt(ZipCode),
-        EventTitle: EventTitle,
-        Details: Details,
+        EventTitle,
+        Details,
         Picture,
         MaximumAttendies: parseInt(MaximumAttendies),
-        CreatorId: req.user.id, //change to be user.id once login is enabled on the frontend,
+        CreatorId: req.user.id,
         category: {
           create: {
             Category: category,
           },
         },
+        Latitude: latitude,
+        Longitude: longitude,
+        // Use a more detailed address from geoData
+        LocationDisplay: address,
       },
     });
+
     res.status(201).json(event);
   } catch (error) {
-    console.error("Error creating event:", error);
+    console.error("Error creating event with geocoding:", error);
     res.status(500).json({ message: "Error creating event." });
   }
 });
@@ -144,11 +148,11 @@ router.put("/:id", authMiddleware, async (req, res) => {
 // Delete an event - this route requires authentication
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  console.log("id",id);
+  console.log("id", id);
   try {
-    let c=await prisma.event.delete({ where: { id } });
-    console.log("c",c);
-    return res.status(201).json({result:"true"});
+    let c = await prisma.event.delete({ where: { id } });
+    console.log("c", c);
+    return res.status(201).json({ result: "true" });
   } catch (error) {
     console.error("Error deleting event:", error);
     res.status(500).json({ message: "Error deleting event." });

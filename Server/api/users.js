@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
 const router = express.Router();
+const authMiddleware = require("./authMiddleware");
 
 // Utility functions
 const hashPassword = async (password) => bcrypt.hash(password, 10);
@@ -12,25 +13,6 @@ const verifyPassword = async (password, hash) => bcrypt.compare(password, hash);
 const generateToken = (user) =>
   jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
-// Middleware for authentication
-const authMiddleware = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "Unauthorized. No token provided or invalid token format.",
-    });
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Unauthorized. Invalid token." });
-  }
-};
-
-// Da Routes
 // Register a new user
 router.post("/register", async (req, res) => {
   const { FirstName, LastName, Email, Password, ZipCode } = req.body;
