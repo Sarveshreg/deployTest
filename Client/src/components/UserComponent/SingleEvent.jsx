@@ -15,11 +15,12 @@ function SingleEvent() {
     let [commentError,setCommentError]=useState(false);
     let [rsvpError,setRsvpError]=useState(false);
     let navigate = useNavigate();
-    let[RsvpDisable,setRsvpDisable]=useState(false)
+    let[RsvpDisable,setRsvpDisable]=useState(false);
+    let[cancelBtn,setCancelBtn]=useState(false);
 
 
     useEffect(()=>{
-      RsvpDisable=false;
+      
       let detail=async()=>{
         let response=await fetch(`http://localhost:3000/api/events/${id}`,{
           method:"GET",
@@ -29,23 +30,30 @@ function SingleEvent() {
           setEventDetail(data);
           console.log(setEventDetail);
           console.log(data);
+          let c= data.RSVPUsers.filter((user)=>user.userID==userId);
+          console.log("c",c)
           if(data.CreatorId==userId){
-            console.log("same creator")
-            setRsvpDisable(false)
+            console.log("same creator");
+            setRsvpDisable(true);
           }
           else if(data.RSVPUsers.length>=data.MaximumAttendies){
-            setRsvpDisable(true)    //disable the RSVP button if enough users have RSVP'ed
-          }
-          let c= data.RSVPUsers.filter((user)=>user.id==userId)
-          if(c){
-            console.log("current user has already rsvp");
+            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
             setRsvpDisable(true);
+          }
+          else if(c.length==1){
+            console.log("current user has already rsvp",c);
+            setRsvpDisable(true);
+            setCancelBtn(true);
+          }
+          else{
+            console.log("inside final else")
+            setRsvpDisable(false)
           }
         }
       };
       detail();
       
-    },[commentError,RsvpDisable])
+    },[commentError,rsvpError,RsvpDisable,cancelBtn])
 
     let sendRsvp= async ()=>{
       setRsvpError(true);
@@ -75,6 +83,7 @@ function SingleEvent() {
 }
 let cancelRsvp= async ()=>{
   console.log("rsvp cancelled by",userId);
+  setRsvpError(true);
   try {
     let response= await fetch(`http://localhost:3000/api/rsvp/${id}`,{
     method:"DELETE",
@@ -85,12 +94,12 @@ let cancelRsvp= async ()=>{
     })
     let result=await response.json();
     console.log("result of cancel",result)
-    // if(result.eventID==id){
-    //   setRsvpError(false);
-    // }
-    // else{
-    //   //do nothing
-    // }
+    if(result.eventID==id){
+      navigate(`/profile`,{replace:true});
+    }
+    else{
+      //do nothing
+    }
     
   } catch (error) {
       console.error(error);
@@ -165,8 +174,9 @@ let cancelRsvp= async ()=>{
           <span><button disabled={RsvpDisable} onClick={(e)=>{sendRsvp()}}>I would like to attend</button> {rsvpError && <span>Unable to RSVP!</span>}</span>
           } */}
           {token && <span>
-              {!RsvpDisable && <button onClick={(e)=>{cancelRsvp()}}>Cancel RSVP</button>}
-              {RsvpDisable && <button onClick={(e)=>{sendRsvp()}}> RSVP</button>}
+              {RsvpDisable && <button disabled={RsvpDisable}>RSVP</button>}
+              {!RsvpDisable && <button onClick={(e)=>{sendRsvp()}}> RSVP</button>}
+              {cancelBtn && <button onClick={(e)=>{cancelRsvp()}}> Cancel RSVP</button>}
             </span>}
 
           <div>
