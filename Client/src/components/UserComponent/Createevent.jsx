@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function Createevent() {
   let token=useSelector((state)=>state.auth.token);
+  let user=useSelector((state)=>state.auth.user);
   let navigate = useNavigate();
 
 
@@ -49,7 +50,9 @@ function Createevent() {
           Details: detail,
           MaximumAttendies: maxAttendees,
           Picture: picture,
-          Time:eventTime
+          Time:eventTime,
+          CreatorName:user.FirstName+" "+user.LastName,
+          CreatorEmail:user.Email
         })
       })
       let result= await response.json();

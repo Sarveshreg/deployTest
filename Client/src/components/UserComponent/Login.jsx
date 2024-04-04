@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector,useDispatch } from 'react-redux';
-import { setToken,setFirstName,setId } from '../../features/auth/authSlice';
+import { setToken, setUser } from '../../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
@@ -45,8 +45,9 @@ function Login() {
       if(response.ok) {
         console.log("Login Successful:", result);
         dispatch(setToken(result.token));
-        dispatch(setFirstName(result.user.FirstName));
-        dispatch(setId(result.user.id));
+        dispatch(setUser(result.user));
+        // dispatch(setId(result.user.id));
+        // dispatch(setEmail(result.user.LastName));
         navigate("/",{replace:true})
       } else {
         console.error("Login Failed:", result.message);

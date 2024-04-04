@@ -12,10 +12,39 @@ const sendMail=async(package,action)=>{
     }
     else if(action=="New Event"){
         subject="New Event Created!";
-        to=package.Email;
-        html=`<strong>${package.FirstName},</strong>
-        <p>You have successfully created an account with us!. Get started by finding local events near you at http://localhost:5173/</p>
+        to=package.CreatorEmail;
+        html=`<strong>${package.CreatorName},</strong>
+        <p>You have successfully created an event with us!.</p>
+        <p><strong>Event Name: </strong>${package.EventTitle}</p>
+        <p><strong>Event Location: </strong>${package.LocationDisplay}</p>
+        <p><strong>Event Date and Time: </strong>${package.Date}</p>
         <p>Group4event Team.</p>`
+    }
+    else if(action=="Delete Event"){
+        subject=" Event Deleted!";
+        to=package.CreatorEmail;
+        html=`<strong>${package.CreatorName},</strong>
+        <p>The following event has been cancelled.</p>
+        <p><strong>Event Name: </strong>${package.EventTitle}</p>
+        <p><strong>Event Location: </strong>${package.LocationDisplay}</p>
+        <p><strong>Event Date and Time: </strong>${package.Date}</p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="RSVP Received"){
+        subject="RSVP Received";
+        to=package.UserEmail;
+        html=`<strong>${package.User_fname},</strong>
+        <p>Your RSVP for the event below has been received.</p>
+        <p><strong>Event Name: </strong>${package.EventTitle}</p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="RSVP Cancelled"){
+        subject="RSVP Cancelled";
+        to=package.UserEmail;
+        html=`<strong>${package.User_fname},</strong>
+        <p>Your RSVP for the event below has been cancelled.</p>
+        <p><strong>Event Name: </strong>${package.EventTitle}</p>
+        <p><strong>Group4event Team.</strong></p>`
     }
 
     console.log("inside send mail");
@@ -37,7 +66,7 @@ const sendMail=async(package,action)=>{
         from: '"group4project 👻" <group4eventproject@gmail.com>', // sender address
         to, // list of receivers
         subject, // Subject line
-        text: "Hello world?", // plain text body
+        text: "Group4event Notification", // plain text body
         html, // html body
     
     }
@@ -45,7 +74,7 @@ const sendMail=async(package,action)=>{
     const sendMail=async(transporter,mailOptions)=>{
         try {
             await transporter.sendMail(mailOptions);
-            console.log(`Email sent to ${package.Email} for ${action}`);
+            console.log(`Email sent to ${to} for ${action}`);
             return(true);
             // res.send("mail sent")
             // console.log("email send")

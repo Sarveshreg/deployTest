@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { useDispatch } from 'react-redux';
-import { setToken,setFirstName,setId } from '../../features/auth/authSlice';
+import { setToken,setUser} from '../../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -54,8 +54,8 @@ function Register() {
       if (response.ok) {
         console.log('Registration Successful:', data);
         dispatch(setToken(data.token));
-        dispatch(setFirstName(data.user.FirstName));
-        dispatch(setId(data.user.id));
+        dispatch(setUser(data.user));
+        // dispatch(setId(data.user.id));
         navigate("/",{replace:true});
         // Additional actions upon successful registration
       } else {
