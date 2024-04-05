@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 import { useEffect,useState,useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import {useSelector,useDispatch} from "react-redux"
+import {useSelector} from "react-redux"
 import { useNavigate } from 'react-router-dom';
 
 function SingleEvent() {
@@ -18,6 +18,8 @@ function SingleEvent() {
     let navigate = useNavigate();
     let[RsvpDisable,setRsvpDisable]=useState(false);
     let[cancelBtn,setCancelBtn]=useState(false);
+    let [dateTime,setDateTime]=useState({});
+
 
 
     useEffect(()=>{
@@ -28,6 +30,16 @@ function SingleEvent() {
         });
         let data=await response.json();
         if(data){
+          if(data.Date.length>10){
+            let date=data.Date.split("T");
+            console.log("date",date)
+            let time=date[1].split(":00.");
+            console.log(time);
+            let Date=date[0];
+            let Time=time[0].replace(":","");
+            setDateTime({Date,Time});
+            console.log(dateTime)
+            }
           setEventDetail(data);
           console.log(setEventDetail);
           console.log(data);
@@ -162,19 +174,26 @@ let cancelRsvp= async ()=>{
       }
     }
 
+    if(!eventDetail.Date){
+      return(
+        <h3>Nothing to display here</h3>
+      )
+    }
+
 
   return (
     <div>
         {eventDetail && 
         <span>
-          <div><strong>{eventDetail.EventTitle}</strong>{(userId==eventDetail.CreatorId) &&<button onClick={(e)=>deleteEvent()}>Delete</button>}</div>
+          <div><strong>{eventDetail.EventTitle}</strong>{(userId==eventDetail.CreatorId) &&<span><button onClick={(e)=>deleteEvent()}>Delete</button> <button onClick={(e)=>navigate("/event/update", {state:eventDetail})}>Update</button> </span>}</div>
           <img src="https://www.discoverhongkong.com/content/dam/dhk/intl/what-s-new/events/events-festivals-720x860.jpg" alt="picture of an event" width={400} height={400} />
           <p><strong>Detail:</strong> {eventDetail.Details}</p>
+          <p><strong>Category:</strong> {eventDetail.category.Category}</p>
           <span><strong>Location: </strong>
               <div> {eventDetail.LocationDisplay}</div>
               
           </span>
-          <p><strong>Date and Time:</strong> {eventDetail.Date}</p>
+          <p><strong>Date and Time:</strong> {dateTime.Date} @ {dateTime.Time} CST</p>
           <p><strong>Maximum Attendees:</strong> {eventDetail.MaximumAttendies}</p>
           <p><strong>RSVP:</strong> Required</p>
           {/* {token && 
