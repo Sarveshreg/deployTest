@@ -22,8 +22,8 @@ const sendMail=async(package,action)=>{
     }
     else if(action=="Delete Event"){
         subject=" Event Deleted!";
-        to=package.CreatorEmail;
-        html=`<strong>${package.CreatorName},</strong>
+        to=package.email;
+        html=`<strong>Dear user,</strong>
         <p>The following event has been cancelled.</p>
         <p><strong>Event Name: </strong>${package.EventTitle}</p>
         <p><strong>Event Location: </strong>${package.LocationDisplay}</p>
@@ -33,6 +33,8 @@ const sendMail=async(package,action)=>{
     else if(action=="RSVP Received"){
         subject="RSVP Received";
         to=package.UserEmail;
+        // to=["bar@example.com", "baz@example.com","sarveshregmi1@gmail.com"];
+
         html=`<strong>${package.User_fname},</strong>
         <p>Your RSVP for the event below has been received.</p>
         <p><strong>Event Name: </strong>${package.EventTitle}</p>
@@ -45,6 +47,36 @@ const sendMail=async(package,action)=>{
         <p>Your RSVP for the event below has been cancelled.</p>
         <p><strong>Event Name: </strong>${package.EventTitle}</p>
         <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="Update Event"){
+        subject="Event Updated";
+        to=package.email;
+        html=`<strong>Dear User,</strong>
+        <p>An event that you have RSVP'ed to has been updated.</p>
+        <p><strong>Event Name: </strong>${package.EventTitle}</p>
+        <p><strong>Event Location: </strong>${package.LocationDisplay}</p>
+        <p><strong>Event Date and Time: </strong>${package.Date}</p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="Send OTP"){
+        subject="OTP For Password Reset";
+        to=package.Email;
+        html=`<strong>Dear User,</strong>
+        <p>Here is your temporary password:</p>
+        <p>${package.OTP}</p>
+        <p><strong>If you did not initiate any account update request, Please call us at 800-808-8080.</strong></p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="Password Reset Complete"){
+        subject="Password Reset Complete";
+        to=package.Email;
+        html=`<strong>Dear User,</strong>
+        <p>Your password has been reset.</p>
+        <p><strong>If you did not initiate any account update request, Please call us at 800-808-8080.</strong></p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else{
+        //do nothing
     }
 
     console.log("inside send mail");
@@ -64,7 +96,7 @@ const sendMail=async(package,action)=>{
     
     const mailOptions={
         from: '"group4project 👻" <group4eventproject@gmail.com>', // sender address
-        to, // list of receivers
+        bcc:to, // list of receivers
         subject, // Subject line
         text: "Group4event Notification", // plain text body
         html, // html body
