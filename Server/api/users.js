@@ -14,6 +14,64 @@ const verifyPassword = async (password, hash) => bcrypt.compare(password, hash);
 const generateToken = (user) =>
   jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
+//Provide OTP for password reset
+  router.post("/otpgen", async (req, res) => {
+    const { Email } = req.body;
+    try {
+      const user = await prisma.users.findUnique({
+        where: { Email },
+      });
+  
+      function getRandomInt(min, max) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+    }
+  
+    let OTP=getRandomInt(10000,99999);
+    let hashedOTP = await hashPassword(OTP.toString());
+    let OTPUpsert=await prisma.OTP.upsert({
+      where:{
+        Email
+      },
+      update:{
+        OTP:hashedOTP
+      },
+      create:{
+        Email,
+        OTP:hashedOTP
+      }
+    })
+    sendMail({...OTPUpsert,OTP},"Send OTP");
+    res.json({message:"Email sent"});
+
+    } catch (error) {
+      console.error("OTP Generation error error:", error);
+      res.status(500).json({ message: "An error occurred during OTP generation." });
+    }
+  });
+
+  //verify OTP
+  router.post("/otpverify", async (req, res) => {
+    const { OTP,Email } = req.body;
+    try {
+      const user = await prisma.OTP.findUnique({
+        where: { Email },
+      });
+      if(await verifyPassword(OTP,user.OTP)){
+        let user = await prisma.users.findUnique({
+          where: { Email},
+        });
+        let token = generateToken(user);
+        res.json({ token, user: { ...user, Password: undefined } });
+      }
+
+    } catch (error) {
+      console.error("OTP verification error :", error);
+      res.status(500).json({ message: "An error occurred during OTP verification." });
+    }
+  });
+
 // Register a new user
 router.post("/register", async (req, res) => {
   const { FirstName, LastName, Email, Password, ZipCode } = req.body;
@@ -114,6 +172,25 @@ router.put("/:id", authMiddleware, async (req, res) => {
   }
 });
 
+//reset password
+router.put("/reset/password", authMiddleware, async (req, res) => {
+  let id=req.user.id;
+  const { password } = req.body;
+  const hashedPassword = await hashPassword(password);
+  try {
+    const updatedUser = await prisma.users.update({
+      where: { id },
+      data: { Password:hashedPassword },
+    });
+    sendMail(updatedUser,"Password Reset Complete");
+    // Exclude the password from the response
+    res.json({ ...updatedUser, Password: undefined });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Error updating user information." });
+  }
+});
+
 // Delete a user - Requires authentication
 router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
@@ -127,5 +204,8 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error deleting user." });
   }
 });
+
+
+
 
 module.exports = router;

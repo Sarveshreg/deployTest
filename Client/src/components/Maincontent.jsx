@@ -8,6 +8,7 @@ import Profile from './UserComponent/Profile'
 import SingleEvent from './UserComponent/SingleEvent'
 import PageNotFound from './PageNotFound'
 import EventUpdate from './UserComponent/EventUpdate'
+import PasswordReset from './UserComponent/PasswordReset'
 
 function Maincontent() {
   return (
@@ -20,6 +21,7 @@ function Maincontent() {
             <Route path='/profile' element={<Profile/>}></Route>
             <Route path='/event/:id' element={<SingleEvent/>}></Route>
             <Route path='/event/update' element={<EventUpdate/>}></Route>
+            <Route path='/passwordreset' element={<PasswordReset/>}></Route>
             <Route path='*' element={<PageNotFound/>}></Route>
         </Routes>
     </div>

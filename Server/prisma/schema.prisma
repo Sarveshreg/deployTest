@@ -97,3 +97,8 @@ model Comment {
   Comment    String
   Created_at DateTime @default(now())
 }
+
+model OTP{
+  Email   String @id
+  OTP     String
+}

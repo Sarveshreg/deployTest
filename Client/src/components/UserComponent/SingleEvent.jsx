@@ -49,14 +49,14 @@ function SingleEvent() {
             console.log("same creator");
             setRsvpDisable(true);
           }
-          else if(data.RSVPUsers.length>=data.MaximumAttendies){
-            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
-            setRsvpDisable(true);
-          }
           else if(c.length==1){
             console.log("current user has already rsvp",c);
             setRsvpDisable(true);
             setCancelBtn(true);
+          }
+          else if(data.RSVPUsers.length>=data.MaximumAttendies){
+            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
+            setRsvpDisable(true);
           }
           else{
             console.log("inside final else")
@@ -210,7 +210,7 @@ let cancelRsvp= async ()=>{
             <div><strong>People attending this event ({eventDetail.RSVPUsers && <span>{eventDetail.RSVPUsers.length}</span>}):</strong></div>
             <span>
                   {eventDetail.RSVPUsers && eventDetail.RSVPUsers.map(user=>
-                    <i key={User_fname}>
+                    <i key={user.userID}>
                       <div>
                         <img src="https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg" alt="profile pic" height={50} width={50} />
                       <div> {user.User_fname} </div> 

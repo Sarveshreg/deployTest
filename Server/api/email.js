@@ -58,6 +58,23 @@ const sendMail=async(package,action)=>{
         <p><strong>Event Date and Time: </strong>${package.Date}</p>
         <p><strong>Group4event Team.</strong></p>`
     }
+    else if(action=="Send OTP"){
+        subject="OTP For Password Reset";
+        to=package.Email;
+        html=`<strong>Dear User,</strong>
+        <p>Here is your temporary password:</p>
+        <p>${package.OTP}</p>
+        <p><strong>If you did not initiate any account update request, Please call us at 800-808-8080.</strong></p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
+    else if(action=="Password Reset Complete"){
+        subject="Password Reset Complete";
+        to=package.Email;
+        html=`<strong>Dear User,</strong>
+        <p>Your password has been reset.</p>
+        <p><strong>If you did not initiate any account update request, Please call us at 800-808-8080.</strong></p>
+        <p><strong>Group4event Team.</strong></p>`
+    }
     else{
         //do nothing
     }

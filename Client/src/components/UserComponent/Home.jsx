@@ -15,7 +15,7 @@ function Home() {
             <li><button className="btn-nav">Groups</button></li>
             <li><button className="btn-profile">Profile</button></li>
             <li><button className="btn-register">Register</button></li>
-            <button onClick={(e)=>navigate(`/event/6e533a3c-f367-4a5e-bd93-70de2d48847a`)}>test</button>
+            <button onClick={(e)=>navigate(`/event/6c1d7f83-d8c5-4958-9aaa-ed8276809624`)}>test</button>
           </ul>
         </nav>
       </header>
