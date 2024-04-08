@@ -106,7 +106,7 @@ function PasswordReset() {
         {passwordPhase && 
         <div>
             <div>Enter new password({Email})</div>
-            <label>Password: <input value={password} onChange={(e)=>setPassword(e.target.value)} type="string" /></label>
+            <label>Password: <input value={password} onChange={(e)=>setPassword(e.target.value)} type="password" /></label>
             <button onClick={()=>sendPassword()}>Submit</button>
             {tooShort && <p>Password too short!</p>}
         </div>}
