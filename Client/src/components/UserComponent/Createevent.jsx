@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import {useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Createevent() {
   let token=useSelector((state)=>state.auth.token);
   let user=useSelector((state)=>state.auth.user);
   let navigate = useNavigate();
+  let API_Link=import.meta.env.VITE_API_LINK;
 
 
   //get current date and use it to set the minimum date limit on the calender
@@ -28,15 +30,17 @@ function Createevent() {
   let[zipCode,setZipCode]=useState("");
   let[maxAttendees,setMaxAttendees]=useState(0);
   let[detail,setDetail]=useState("");
-  let[picture,setPicture]=useState("");
+  let[picture,setPicture]=useState({});
 
 
   //define a function to call when the form is submitted
   async function EventSubmit(e){
     e.preventDefault();
-    console.log(title, category, eventDate, eventTime, street, city, eventState, zipCode, maxAttendees,detail,picture)
+    let formData=new FormData();
+    formData.append("picture",picture);
     try {
-      let response= await fetch("http://localhost:3000/api/events",{
+
+      let response= await fetch(API_Link+"events",{
         method: "POST",
         headers: {
           "Content-Type" : "application/json",
@@ -52,21 +56,36 @@ function Createevent() {
           EventTitle: title,
           Details: detail,
           MaximumAttendies: maxAttendees,
-          Picture: picture,
+          // Picture: picture,
           Time:eventTime,
           CreatorName:user.FirstName+" "+user.LastName,
           CreatorEmail:user.Email
-        })
+        }),
+        file:picture
       })
       let result= await response.json();
-      console.log(result);
       if(result.id){
-        console.log("redirecting")
+        formData.append("id",result.id);
+        let response=await axios.post(
+          `${API_Link}events/event-pic/${result.id}`,
+          formData,
+          {
+            headers:{
+              "Content-Type" : "multipart/form-data",
+              "Authorization" : `Bearer ${token}`     //provide the token
+            },
+          }
+        );
+        // response.data.uploaded ? console.log("response",response): console.log("Picture not uploaded");
         navigate(`/event/${result.id}`,{replace:true})
       }
     } catch (error) {
       console.error(error);
     }
+  }
+
+  let onInputChange=(e)=>{
+    setPicture(e.target.files[0]);
   }
 
   if(!token){
@@ -80,7 +99,7 @@ function Createevent() {
 
     <div>
       <h3>Create an Event!</h3>
-      <form>
+      <form onSubmit={EventSubmit}>
         <label>Title: <input type="text" value={title} onChange={(e)=>setTitle(e.target.value)} /></label><br />
         <label>Category: 
           <select value={category} onChange={(e)=>setCategory(e.target.value)}>
@@ -102,8 +121,9 @@ function Createevent() {
         <label>Zip Code: <input type="number" value={zipCode} onChange={(e)=>setZipCode(e.target.value)} /></label><br />
         <label>Maximum Attendees: <input type="number" value={maxAttendees} min={1} onChange={(e)=>setMaxAttendees(e.target.value)}/></label><br />
         <label>Detail: <textarea rows={4} cols={50} value={detail} onChange={(e)=>setDetail(e.target.value)} /></label><br />
-        <label> Picture: <input type="text" value={picture} onChange={(e)=>setPicture(e.target.value)}/></label><br />
-        <button onClick={(e)=>EventSubmit(e)}>Submit</button>
+        <label> Picture: <input name="foo" type="file"  accept='image/*' onChange={onInputChange}/></label><br />
+        <button type='submit'>Submit</button>
+        {/* <button onClick={(e)=>EventSubmit(e)}>Submit</button> */}
       </form>
     </div>
 

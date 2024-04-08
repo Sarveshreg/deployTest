@@ -10,21 +10,22 @@ function Profile() {
   let [error, setError] = useState(null);
   let [rsvpError, setRsvpError] = useState(false);
   let [rsvpCancel, setRsvpCancel] = useState(false);
+  let [eventCancel, setEventCancel] = useState(false);
   let token=useSelector((state)=>state.auth.token);
   let id=useSelector((state)=>state.auth.user.id);
   let navigate = useNavigate();
+  let API_Link=import.meta.env.VITE_API_LINK;
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/users/${id}`,{
+        const response = await fetch(`${API_Link}users/${id}`,{
           method: "GET",
         headers: {
           "Content-Type" : "application/json",
           "Authorization" : `Bearer ${token}`     //provide the token 
         }}); 
         let data=await response.json();
-        console.log("profile",data)
         setProfileData(data);
       } catch (error) {
         setError(error.message || 'Failed to fetch user profile');
@@ -33,16 +34,18 @@ function Profile() {
 
     const fetchCreatedEvents = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/users/${id}/events`,{
+        const response = await fetch(`${API_Link}users/${id}/events`,{
           method: "GET",
         headers: {
           "Content-Type" : "application/json",
           "Authorization" : `Bearer ${token}`     //provide the token 
         }}); 
         let data=await response.json();
-        console.log("event",data)
         if(!data.message){
         setCreatedEvents(data);
+        }
+        else{
+          setCreatedEvents(null);
         }
       } catch (error) {
         setError(error.message || 'Failed to fetch user profile');
@@ -51,14 +54,13 @@ function Profile() {
 
     const fetchRsvpEvent = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/rsvp`,{
+        const response = await fetch(`${API_Link}rsvp`,{
           method: "GET",
         headers: {
           "Content-Type" : "application/json",
           "Authorization" : `Bearer ${token}`     //provide the token 
         }}); 
         let data=await response.json();
-        console.log("rsvp",data)
         if(!data.message){
           setRsvpEvents(data);
         }
@@ -74,18 +76,16 @@ function Profile() {
     return () => {
       
     };
-  }, [rsvpError,rsvpCancel]);
+  }, [rsvpError,rsvpCancel,eventCancel]);
 
   let eventDetail=(n)=>{
-    console.log("showing single event detail",n)
     navigate(`/event/${n}`)
   }
 
   let cancelRsvp= async (eventId)=>{
     setRsvpError(true);
-    console.log("rsvp cancelled for",eventId);
     try {
-      let response= await fetch(`http://localhost:3000/api/rsvp/${eventId}`,{
+      let response= await fetch(`${API_Link}rsvp/${eventId}`,{
       method:"DELETE",
       headers:{
         "Content-Type" : "application/json",
@@ -93,9 +93,7 @@ function Profile() {
       },
       })
       let result=await response.json();
-      console.log("result of cancel",result)
       if(result.eventID==eventId){
-        console.log("event rsvp cancelled");
         setRsvpError(false);
         setRsvpCancel(true);
       }
@@ -105,6 +103,27 @@ function Profile() {
       
     } catch (error) {
         console.error(error);
+    }
+  }
+
+  let deleteEvent=async(eventId)=>{
+    setEventCancel(false)
+    try {
+      let response= await fetch(`${API_Link}events/${eventId}`,{
+        method:"DELETE",
+        headers:{
+          "Content-Type" : "application/json",
+          "Authorization" : `Bearer ${token}`     //provide the token 
+        },
+        })
+        let result=await response.json();
+        if(result.result){
+          alert("Event deleted!");
+          setEventCancel(true)
+        }
+
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -130,7 +149,7 @@ function Profile() {
           <ul>
             {!createdEvents && <p>NO Event Created!</p>}
             {createdEvents && createdEvents.map(event => (
-              <li key={event.id}>{event.EventTitle} <button onClick={(e)=>eventDetail(event.id)}>Detail</button></li>
+              <li key={event.id}>{event.EventTitle} <button onClick={(e)=>eventDetail(event.id)}>Detail</button> <button onClick={(e)=>deleteEvent(event.id)}>Delete</button></li>
             ))}
           </ul>
 

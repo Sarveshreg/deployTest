@@ -5,6 +5,17 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const sendMail=require("./email");
+const multer  = require('multer');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    return cb(null, 'pictures/')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    return cb(null, `${req.user.id}.png`);
+  }
+});
+const upload = multer({ storage: storage });
 
 const authMiddleware = require("./authMiddleware");
 
@@ -40,8 +51,14 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.post("/event-pic/:id", authMiddleware,upload.single('picture'), async (req, res) => {
+  console.log("req.body.data is",req.id);
+  res.send(req.body);
+});
+
 // Create a new event - this route requires authentication
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", authMiddleware,upload.single('picture'), async (req, res) => {
+
   const {
     Date,
     Street,
@@ -53,7 +70,7 @@ router.post("/", authMiddleware, async (req, res) => {
     Time,
     MaximumAttendies,
     category,
-    Picture,
+    // Picture,
     CreatorName,
     CreatorEmail
   } = req.body;
@@ -90,7 +107,7 @@ router.post("/", authMiddleware, async (req, res) => {
         ZipCode: parseInt(ZipCode),
         EventTitle,
         Details,
-        Picture,
+        Picture:"demo",
         CreatorEmail,
         CreatorName,
         MaximumAttendies: parseInt(MaximumAttendies),

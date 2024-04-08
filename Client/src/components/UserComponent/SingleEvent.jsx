@@ -30,6 +30,7 @@ function SingleEvent() {
     let[RsvpDisable,setRsvpDisable]=useState(false);
     let[cancelBtn,setCancelBtn]=useState(false);
     let [dateTime,setDateTime]=useState({});
+    let API_Link=import.meta.env.VITE_API_LINK;
 
 
   const [isMapsApiLoaded, setIsMapsApiLoaded] = useState(false);
@@ -45,41 +46,32 @@ function SingleEvent() {
       });
 
       let detail=async()=>{
-        let response=await fetch(`http://localhost:3000/api/events/${id}`,{
+        let response=await fetch(`${API_Link}events/${id}`,{
           method:"GET",
         });
         let data=await response.json();
         if(data){
           if(data.Date.length>10){
             let date=data.Date.split("T");
-            console.log("date",date)
             let time=date[1].split(":00.");
-            console.log(time);
             let Date=date[0];
             let Time=time[0].replace(":","");
             setDateTime({Date,Time});
-            console.log(dateTime)
             }
           setEventDetail(data);
-          console.log(setEventDetail);
-          console.log(data);
+
           let c= data.RSVPUsers.filter((user)=>user.userID==userId);
-          console.log("c",c)
           if(data.CreatorId==userId){
-            console.log("same creator");
             setRsvpDisable(true);
           }
           else if(c.length==1){
-            console.log("current user has already rsvp",c);
             setRsvpDisable(true);
             setCancelBtn(true);
           }
           else if(data.RSVPUsers.length>=data.MaximumAttendies){
-            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
             setRsvpDisable(true);
           }
           else{
-            console.log("inside final else")
             setRsvpDisable(false)
           }
         }
@@ -90,9 +82,9 @@ function SingleEvent() {
 
     let sendRsvp= async ()=>{
       setRsvpError(true);
-      console.log("rsvp clicked by",userId);
+
       try {
-        let response= await fetch(`http://localhost:3000/api/rsvp/${id}`,{
+        let response= await fetch(`${API_Link}rsvp/${id}`,{
         method:"POST",
         headers:{
           "Content-Type" : "application/json",
@@ -118,10 +110,9 @@ function SingleEvent() {
       }
 }
 let cancelRsvp= async ()=>{
-  console.log("rsvp cancelled by",userId);
   setRsvpError(true);
   try {
-    let response= await fetch(`http://localhost:3000/api/rsvp/${id}`,{
+    let response= await fetch(`${API_Link}rsvp/${id}`,{
     method:"DELETE",
     headers:{
       "Content-Type" : "application/json",
@@ -132,7 +123,6 @@ let cancelRsvp= async ()=>{
     })
     })
     let result=await response.json();
-    console.log("result of cancel",result)
     if(result.eventID==id){
       navigate(`/profile`,{replace:true});
     }
@@ -147,9 +137,8 @@ let cancelRsvp= async ()=>{
 
     let postComment=async()=>{
       setCommentError(true);
-      console.log("posting comment",c," by ",userId, " ",User_fname );
       try {
-        let response= await fetch(`http://localhost:3000/api/events/${id}/comment`,{
+        let response= await fetch(`${API_Link}events/${id}/comment`,{
         method:"POST",
         headers:{
           "Content-Type" : "application/json",
@@ -170,14 +159,13 @@ let cancelRsvp= async ()=>{
         }
 
       } catch (error) {
-        console.error();("unable to post comment",error);
+        console.error();(error);
       }
     }
 
     let deleteEvent=async()=>{
-      console.log("event deleted",id)
       try {
-        let response= await fetch(`http://localhost:3000/api/events/${id}`,{
+        let response= await fetch(`${API_Link}events/${id}`,{
           method:"DELETE",
           headers:{
             "Content-Type" : "application/json",
@@ -186,6 +174,7 @@ let cancelRsvp= async ()=>{
           })
           let result=await response.json();
           if(result.result){
+            alert("Event deleted!");
             navigate(`/profile`,{replace:true});
           }
 
