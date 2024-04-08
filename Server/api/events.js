@@ -27,6 +27,7 @@ router.get("/:id", async (req, res) => {
       include: {
         RSVPUsers: true,
         Comment: true,
+        category:true
       },
     });
     if (event) {
@@ -99,6 +100,13 @@ router.post("/", authMiddleware, async (req, res) => {
             Category: category,
           },
         },
+        RSVPUsers:{
+          create:{
+            User_fname: CreatorName,
+            UserEmail:CreatorEmail,
+            userID:req.user.id,
+          }
+        },
         Latitude: latitude,
         Longitude: longitude,
         // Use a more detailed address from geoData
@@ -137,12 +145,60 @@ router.post("/:id/comment", authMiddleware, async (req, res) => {
 // Update an event - this route requires authentication
 router.put("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
+  const {Date,Street,City,State,ZipCode,EventTitle,Details,MaximumAttendies,Picture,Time,category} = req.body.updates;
+  const DateTime = Date + "T" + Time + ":00.000z";
+
+  const address = `${Street}, ${City}, ${State}, ${ZipCode}`;
+ 
   try {
+    // Use the geocoding API to get latitude and longitude for the address
+    const geoResponse = await axios.get(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        address
+      )}`
+    );
+    const [geoData] = geoResponse.data;
+
+    if (!geoData) {
+      return res
+        .status(404)
+        .json({ message: "Address not found for geocoding." });
+    }
+
+    // Extract latitude and longitude
+    const latitude = parseFloat(geoData.lat);
+    const longitude = parseFloat(geoData.lon);
+
+    //update the database
     const event = await prisma.event.update({
       where: { id },
-      data: updates,
+      data: {
+        Street,City,State,EventTitle,Details,Picture,
+        Latitude:latitude,Longitude:longitude,
+        Date:DateTime,
+        ZipCode:parseInt(ZipCode),
+        MaximumAttendies:parseInt(MaximumAttendies),
+        LocationDisplay:address,        
+        category: {
+          update: {
+            data:{
+              Category: category,
+            }
+          },
+        },
+      }
     });
+    console.log("event",event);
+
+    //get emailid of users thas have RSVP'ed for this event 
+    let rsvpUserEmail=await prisma.RSVP.findMany({ 
+      where: { eventID:id }, 
+        select:{
+          UserEmail:true,
+      }, });
+    let email=rsvpUserEmail.map((a)=>a.UserEmail);
+    sendMail({...event,email},"Update Event");
+
     res.json(event);
   } catch (error) {
     console.error("Error updating event:", error);
@@ -155,9 +211,14 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
   console.log("id", id);
   try {
+    let rsvpUserEmail=await prisma.RSVP.findMany({ 
+      where: { eventID:id }, 
+        select:{
+          UserEmail:true,
+      }, });
+    let email=rsvpUserEmail.map((a)=>a.UserEmail);
     let event = await prisma.event.delete({ where: { id } });
-    console.log("c", event);
-    sendMail(event,"Delete Event");
+    sendMail({...event,email},"Delete Event");
     return res.status(201).json({ result: "true" });
   } catch (error) {
     console.error("Error deleting event:", error);

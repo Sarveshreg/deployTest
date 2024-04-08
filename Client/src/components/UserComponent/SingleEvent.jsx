@@ -1,7 +1,9 @@
-import React from 'react'
+import React from 'react';
 import { useEffect,useState,useRef } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { useSelector } from "react-redux"
+
 import { useNavigate } from 'react-router-dom';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import loadGoogleMapsAPI from './loadGoogleMapsAPI';
@@ -27,6 +29,8 @@ function SingleEvent() {
     let navigate = useNavigate();
     let[RsvpDisable,setRsvpDisable]=useState(false);
     let[cancelBtn,setCancelBtn]=useState(false);
+    let [dateTime,setDateTime]=useState({});
+
 
   const [isMapsApiLoaded, setIsMapsApiLoaded] = useState(false);
 
@@ -46,6 +50,16 @@ function SingleEvent() {
         });
         let data=await response.json();
         if(data){
+          if(data.Date.length>10){
+            let date=data.Date.split("T");
+            console.log("date",date)
+            let time=date[1].split(":00.");
+            console.log(time);
+            let Date=date[0];
+            let Time=time[0].replace(":","");
+            setDateTime({Date,Time});
+            console.log(dateTime)
+            }
           setEventDetail(data);
           console.log(setEventDetail);
           console.log(data);
@@ -55,14 +69,14 @@ function SingleEvent() {
             console.log("same creator");
             setRsvpDisable(true);
           }
-          else if(data.RSVPUsers.length>=data.MaximumAttendies){
-            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
-            setRsvpDisable(true);
-          }
           else if(c.length==1){
             console.log("current user has already rsvp",c);
             setRsvpDisable(true);
             setCancelBtn(true);
+          }
+          else if(data.RSVPUsers.length>=data.MaximumAttendies){
+            console.log("max attendies reached");    //disable the RSVP button if enough users have RSVP'ed
+            setRsvpDisable(true);
           }
           else{
             console.log("inside final else")
@@ -182,21 +196,28 @@ let cancelRsvp= async ()=>{
 
     if (!eventDetail || !isMapsApiLoaded || !eventDetail.Latitude || !eventDetail.Longitude) {
       return <div>Loading...</div>; // Display a loading message or spinner
-  }
+
+    else if(!eventDetail.Date){
+      return(
+        <h3>Nothing to display here</h3>
+      )
+    }
+
 
 
   return (
     <div>
         {eventDetail && 
         <span>
-          <div><strong>{eventDetail.EventTitle}</strong>{(userId==eventDetail.CreatorId) &&<button onClick={(e)=>deleteEvent()}>Delete</button>}</div>
+          <div><strong>{eventDetail.EventTitle}</strong>{(userId==eventDetail.CreatorId) &&<span><button onClick={(e)=>deleteEvent()}>Delete</button> <button onClick={(e)=>navigate("/event/update", {state:eventDetail})}>Update</button> </span>}</div>
           <img src="https://www.discoverhongkong.com/content/dam/dhk/intl/what-s-new/events/events-festivals-720x860.jpg" alt="picture of an event" width={400} height={400} />
           <p><strong>Detail:</strong> {eventDetail.Details}</p>
+          <p><strong>Category:</strong> {eventDetail.category.Category}</p>
           <span><strong>Location: </strong>
               <div> {eventDetail.LocationDisplay}</div>
               
           </span>
-          <p><strong>Date and Time:</strong> {eventDetail.Date}</p>
+          <p><strong>Date and Time:</strong> {dateTime.Date} @ {dateTime.Time} CST</p>
           <p><strong>Maximum Attendees:</strong> {eventDetail.MaximumAttendies}</p>
           <p><strong>RSVP:</strong> Required</p>
           {/* {token && 
@@ -216,7 +237,7 @@ let cancelRsvp= async ()=>{
             <div><strong>People attending this event ({eventDetail.RSVPUsers && <span>{eventDetail.RSVPUsers.length}</span>}):</strong></div>
             <span>
                   {eventDetail.RSVPUsers && eventDetail.RSVPUsers.map(user=>
-                    <i key={User_fname}>
+                    <i key={user.userID}>
                       <div>
                         <img src="https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg" alt="profile pic" height={50} width={50} />
                       <div> {user.User_fname} </div> 

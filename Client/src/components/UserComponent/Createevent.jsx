@@ -11,8 +11,11 @@ function Createevent() {
   //get current date and use it to set the minimum date limit on the calender
   let today=new Date();
   let monthPlaceholder="";
-  if(today.getMonth()<10){monthPlaceholder="0"}
-  let startDate=today.getFullYear()+"-"+monthPlaceholder+(today.getMonth()+1)+"-"+today.getDate();
+  let dayPlaceholder="";
+  if(today.getMonth()<10){monthPlaceholder="0"};
+  if(today.getDay()<10){dayPlaceholder="0"};
+  let startDate=today.getFullYear()+"-"+monthPlaceholder+(today.getMonth()+1)+"-"+dayPlaceholder+today.getDate();
+
 
   //declare all the state variable
   let[title,setTitle]=useState("");

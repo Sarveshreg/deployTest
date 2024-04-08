@@ -51,7 +51,7 @@ function Login() {
         navigate("/",{replace:true})
       } else {
         console.error("Login Failed:", result.message);
-        setServerError(true);
+        setCredentialError(true);
       }
 
     } catch (error) {
@@ -69,7 +69,9 @@ function Login() {
       <form>
         <label >Email: <input type="text" onChange={(e)=>setEmail(e.target.value)} placeholder='email' value={email} /></label>
         <label > Password: <input type="password" onChange={(e)=>setPassword(e.target.value)} value={password} /></label>
-        <button onClick={(e)=>handleSubmit(e)}>Submit</button>
+        <button onClick={(e)=>handleSubmit(e)}>Submit</button><br />
+        <a href="/passwordreset">Forgot Password</a>
+
         {credentialError && <p>Invalid email or password entered!</p>}
         {serverError && <p>Unable to connect to the server!</p>}
       </form>
