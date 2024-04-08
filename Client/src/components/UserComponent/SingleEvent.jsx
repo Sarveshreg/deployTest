@@ -1,8 +1,17 @@
 import React from 'react'
 import { useEffect,useState,useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import {useSelector,useDispatch} from "react-redux"
+import { useSelector } from "react-redux"
 import { useNavigate } from 'react-router-dom';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import loadGoogleMapsAPI from './loadGoogleMapsAPI';
+
+const containerStyle = {
+  width: '400px',
+  height: '400px'
+};
+
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 function SingleEvent() {
     let {id}=useParams();
@@ -19,9 +28,18 @@ function SingleEvent() {
     let[RsvpDisable,setRsvpDisable]=useState(false);
     let[cancelBtn,setCancelBtn]=useState(false);
 
+  const [isMapsApiLoaded, setIsMapsApiLoaded] = useState(false);
 
     useEffect(()=>{
       
+      loadGoogleMapsAPI()
+      .then(() => {
+        setIsMapsApiLoaded(true); // Google Maps API is ready to use
+      })
+      .catch(error => {
+        console.error("Failed to load Google Maps API", error);
+      });
+
       let detail=async()=>{
         let response=await fetch(`http://localhost:3000/api/events/${id}`,{
           method:"GET",
@@ -51,10 +69,10 @@ function SingleEvent() {
             setRsvpDisable(false)
           }
         }
-      };
+      }; 
       detail();
       
-    },[commentError,rsvpError,RsvpDisable,cancelBtn])
+    },[commentError,rsvpError,RsvpDisable,cancelBtn,id])
 
     let sendRsvp= async ()=>{
       setRsvpError(true);
@@ -162,6 +180,10 @@ let cancelRsvp= async ()=>{
       }
     }
 
+    if (!eventDetail || !isMapsApiLoaded || !eventDetail.Latitude || !eventDetail.Longitude) {
+      return <div>Loading...</div>; // Display a loading message or spinner
+  }
+
 
   return (
     <div>
@@ -180,6 +202,9 @@ let cancelRsvp= async ()=>{
           {/* {token && 
           <span><button disabled={RsvpDisable} onClick={(e)=>{sendRsvp()}}>I would like to attend</button> {rsvpError && <span>Unable to RSVP!</span>}</span>
           } */}
+          <>
+          {/* Event details... */}
+        </>
           {token && <span>
               {RsvpDisable && <button disabled={RsvpDisable}>RSVP</button>}
               {!RsvpDisable && <button onClick={(e)=>{sendRsvp()}}> RSVP</button>}
@@ -217,6 +242,16 @@ let cancelRsvp= async ()=>{
                     </ol>
                   )}
           </div>
+          
+           {eventDetail.Latitude && eventDetail.Longitude && (
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={{ lat: eventDetail.Latitude, lng: eventDetail.Longitude }}
+                zoom={15}
+              >
+                <Marker position={{ lat: parseFloat(eventDetail.Latitude), lng: parseFloat(eventDetail.Longitude) }} />
+              </GoogleMap>
+                    )}
         
         </span>
         }

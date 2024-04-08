@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSelector,useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setToken, setUser } from '../../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 

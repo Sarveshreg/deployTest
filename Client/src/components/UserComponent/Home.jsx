@@ -1,14 +1,30 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import EventMap from './EventMap'; 
+import axios from 'axios';
 
 function Home() {
-  let navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/events');
+        setEvents(response.data); // Adjust based on your actual API response structure
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
-    <>
-    <div>Thiis the Home page</div>
-    <button onClick={(e)=>navigate(`/event/affd58bb-1b56-4b04-968f-2440caea8dd2`)}>test</button>
-    </>
-  )
+    <div>
+      <h1>Events Near You</h1>
+      {/* Ensure events are passed down as props */}
+      <EventMap events={events} />
+    </div>
+  );
 }
 
-export default Home
+export default Home;
