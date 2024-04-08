@@ -13,9 +13,12 @@ function Register() {
     password: '',
     zipCode: '',
   });
+  let[emailError,setEmailError]=useState(false);
+  let[registerError,setRegisterError]=useState(false);
 
   const dispatch = useDispatch();
   let navigate=useNavigate();
+  let API_Link=import.meta.env.VITE_API_LINK;
 
   // handles changes to the form submission
   const handleChange = (e) => {
@@ -29,6 +32,8 @@ function Register() {
   //handles form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setEmailError(true);
+    setRegisterError(true)
     try {
       // Convert ZipCode from string to integer
       const payload = {
@@ -36,7 +41,7 @@ function Register() {
         ZipCode: parseInt(formData.zipCode, 10) // Ensure ZipCode is an integer
       };
   
-      const response = await fetch('http://localhost:3000/api/users/register', {
+      const response = await fetch(API_Link+'users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,16 +56,23 @@ function Register() {
       });
   
       const data = await response.json();
-      if (response.ok) {
-        console.log('Registration Successful:', data);
+      if (data.token) {
         dispatch(setToken(data.token));
         dispatch(setUser(data.user));
-        // dispatch(setId(data.user.id));
+        setEmailError(false);
+        setRegisterError(false)
         navigate("/",{replace:true});
         // Additional actions upon successful registration
-      } else {
-        console.error('Registration Failed:', data);
-        // Handle failed registration
+      } else if (data.message=="Email is already in use.") {
+        // Handle failed registration 
+        setRegisterError(true);
+        setFormData({...formData,email:"",password:""})
+      }
+      else{
+        formData.password="";
+        setEmailError(false);
+        setRegisterError(true);
+        setFormData({...formData,email:"",password:""})
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -70,64 +82,60 @@ function Register() {
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>First Name</label>
-        <input
-          type="text"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Last Name</label>
-        <input
-          type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Zip Code</label>
-        <input
-          type="text"
-          name="zipCode"
-          value={formData.zipCode}
-          onChange={handleChange}
-        />
-      </div>
-      <button type="submit">Register</button>
-    </form>
+    <>
+      {registerError && <p>Unable to register . Try again</p>}
+      {emailError && <p>Email already in use</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>First Name</label>
+          <input
+            type="text"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Last Name</label>
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Zip Code</label>
+          <input
+            type="text"
+            name="zipCode"
+            value={formData.zipCode}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Register</button>
+      </form>
+    </>
   );
 }
 
 export default Register;
 
-//have the user enter the following to register:
-// first name
-// last name
-// email
-// password
-// zip code
-
-//and then set up an API call so that these info can be sent to the backend

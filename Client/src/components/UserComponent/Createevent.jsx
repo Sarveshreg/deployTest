@@ -7,6 +7,7 @@ function Createevent() {
   let token=useSelector((state)=>state.auth.token);
   let user=useSelector((state)=>state.auth.user);
   let navigate = useNavigate();
+  let API_Link=import.meta.env.VITE_API_LINK;
 
 
   //get current date and use it to set the minimum date limit on the calender
@@ -37,11 +38,9 @@ function Createevent() {
     e.preventDefault();
     let formData=new FormData();
     formData.append("picture",picture);
-    console.log("form data",formData.picture);
-    console.log(title, category, eventDate, eventTime, street, city, eventState, zipCode, maxAttendees,detail,picture)
     try {
 
-      let response= await fetch("http://localhost:3000/api/events",{
+      let response= await fetch(API_Link+"events",{
         method: "POST",
         headers: {
           "Content-Type" : "application/json",
@@ -65,11 +64,10 @@ function Createevent() {
         file:picture
       })
       let result= await response.json();
-      console.log(result);
       if(result.id){
         formData.append("id",result.id);
         let response=await axios.post(
-          `http://localhost:3000/api/events/event-pic/${result.id}`,
+          `${API_Link}events/event-pic/${result.id}`,
           formData,
           {
             headers:{
@@ -78,9 +76,7 @@ function Createevent() {
             },
           }
         );
-        console.log("response",response);
         // response.data.uploaded ? console.log("response",response): console.log("Picture not uploaded");
-        console.log("redirecting")
         navigate(`/event/${result.id}`,{replace:true})
       }
     } catch (error) {
@@ -89,7 +85,6 @@ function Createevent() {
   }
 
   let onInputChange=(e)=>{
-    console.log(e.target.files[0]);
     setPicture(e.target.files[0]);
   }
 

@@ -5,25 +5,24 @@ import { useNavigate } from "react-router-dom";
 
 function EventUpdate() {
     let token=useSelector((state)=>state.auth.token);
+    let userId=useSelector((state)=>state.auth.user.id);
     let navigate = useNavigate();
     let location=useLocation();
+    let API_Link=import.meta.env.VITE_API_LINK;
     if(location.state.category.Category){
     location.state.category=location.state.category.Category;
     }
 
-
-
     if(location.state.Date.length>10){
         let date=location.state.Date.split("T");
-        console.log("date",date)
-        let time=date[1].split(":00");
-        console.log(time);
+        let time=date[1].split(":00.");
         location.state.Date=date[0];
         location.state.Time=time[0];
         }
 
     let[event,setEvent]=useState(location.state);
     let[addressError,setAddressError]=useState(false);
+    let[updateError,setUpdateError]=useState(false);
 
       //get current date and use it to set the minimum date limit on the calender
     let today=new Date();
@@ -34,11 +33,16 @@ function EventUpdate() {
     let startDate=today.getFullYear()+"-"+monthPlaceholder+(today.getMonth()+1)+"-"+dayPlaceholder+today.getDate();
 
     async function EventUpdate(e){
-        setAddressError(false);
         e.preventDefault();
-        console.log("updated event",event);
+        setAddressError(false);
+        setUpdateError(false);
+        if(!(event.Date && event.Street && event.City && event.State && event.ZipCode && event.EventTitle && event.Details &&
+            event.MaximumAttendies && event.Picture && event.Time && event.category)){
+
+                return(setUpdateError(true));
+            }
         try {
-            let response= await fetch(`http://localhost:3000/api/events/${event.id}`,{
+            let response= await fetch(`${API_Link}events/${event.id}`,{
                 method: "PUT",
                 headers: {
                 "Content-Type" : "application/json",
@@ -49,25 +53,30 @@ function EventUpdate() {
                 })
             })
             let result= await response.json();
-            console.log(result);
             if(result.id){
-                console.log("redirecting")
                 navigate(`/event/${result.id}`,{replace:true})
             }
             else if(result.message=="Address not found for geocoding."){
                 setAddressError(true);
+                setUpdateError(true);
             }
             } catch (error) {
+                setAddressError(false);
+                setUpdateError(true);
             console.error(error);
             }
         }
 
-    if(!location.state.id){
-        return(<h4>Nothing to display</h4>)
+    if(userId && userId!=location.state.CreatorId){
+        return(<h4>Forbidden!</h4>)
+    }
+    if(!userId){
+        return(<h4>You need to be logged in to view this page!</h4>)
     }
 
   return (
     <div>
+        {updateError && <p>Unable to Update. Please make sure all fields are filled out correctly.</p>}
         {addressError && <p>Invalid Address</p>}
         <h3>Update your Event</h3>
         <form>

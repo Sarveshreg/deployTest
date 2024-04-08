@@ -7,7 +7,6 @@ import { clearToken } from '../features/auth/authSlice';
 function Navbar() {
   let token=useSelector((state)=>state.auth.token);
   let dispatch = useDispatch()
-  console.log(token);
   return (
     <span>
       <NavLink to="/"> Home</NavLink>

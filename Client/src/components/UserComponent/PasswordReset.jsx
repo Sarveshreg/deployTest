@@ -12,10 +12,11 @@ function PasswordReset() {
     let[passwordPhase,setPasswordPhase]=useState(false);
     let[tooShort,setTooShort]=useState(false);
     let navigate=useNavigate();
+    let API_Link=import.meta.env.VITE_API_LINK;
 
     let sendEmail=async()=>{
         try {
-            let response= await fetch ("http://localhost:3000/api/users/otpgen",{
+            let response= await fetch (API_Link+"users/otpgen",{
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json",
@@ -25,7 +26,6 @@ function PasswordReset() {
                 }),
             });
             let result= await response.json();
-            console.log("result",result);
             if(result.message){
                 setOtpPhase(true);
                 setEmailPhase(false);
@@ -37,7 +37,7 @@ function PasswordReset() {
 
     let sendOTP=async()=>{
         try {
-            let response= await fetch ("http://localhost:3000/api/users/otpverify",{
+            let response= await fetch (API_Link+"users/otpverify",{
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json",
@@ -48,7 +48,6 @@ function PasswordReset() {
                 }),
             });
             let result= await response.json();
-            console.log("result",result);
             if(result.token){
                 setToken(result.token);
                 setOtpPhase(false);
@@ -65,9 +64,8 @@ function PasswordReset() {
             setTooShort(true);
             return(null);
         }
-        console.log("token",token);
         try {
-            let response= await fetch ("http://localhost:3000/api/users/reset/password",{
+            let response= await fetch (API_Link+"users/reset/password",{
                 method: "put",
                 headers:{
                     "Content-Type": "application/json",
@@ -78,7 +76,7 @@ function PasswordReset() {
                 }),
             });
             let result= await response.json();
-            console.log("result",result);
+
             if(result.Email==Email){
                 alert("Password reset complete. You will now be redirected to the login page.")
                 navigate("/login",{replace:true});
