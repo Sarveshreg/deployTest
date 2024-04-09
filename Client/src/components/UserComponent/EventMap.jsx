@@ -10,6 +10,7 @@ const containerStyle = {
 const EventMap = ({ events }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [mapIsReady, setMapIsReady] = useState(false);
+  const [userLocation, setUserLocation] = useState({lat:47.5951518, lng:-122.3316393});
   const navigate = useNavigate();
 
   const handleMarkerClick = (eventId) => {
@@ -19,25 +20,32 @@ const EventMap = ({ events }) => {
   useEffect(() => {
     const checkGoogleMapsApi = () => {
       if (window.google) {
-        console.log('Google Maps API is loaded and ready to use.');
+        navigator.geolocation.getCurrentPosition(   //get the current position of the user to center the map
+          (position) => {
+            setUserLocation({lat:position.coords.latitude, lng:position.coords.longitude});
+
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
         setMapIsReady(true);
       } else {
-        console.log('Google Maps API is not loaded yet.');
         setTimeout(checkGoogleMapsApi, 1000);
       }
     };
 
     checkGoogleMapsApi();
-  }, []);
+  }, [mapIsReady]);
 
   if (!mapIsReady) {
     return <div>Loading Maps...</div>;
   }
 
   return (
-    <GoogleMap
+  <GoogleMap
       mapContainerStyle={containerStyle}
-      center={{ lat: 33.4735, lng: -82.0105 }}
+      center={{ lat: userLocation.lat, lng: userLocation.lng }}
       zoom={10}
     >
       {events.map(event => (
@@ -47,10 +55,7 @@ const EventMap = ({ events }) => {
           onClick={() => setSelectedEvent(event)}
         />
       ))}
-
-// Map Marker 
-
-      {selectedEvent && (
+{selectedEvent && (
         <InfoWindow
           position={{ lat: selectedEvent.Latitude, lng: selectedEvent.Longitude }}
           onCloseClick={() => setSelectedEvent(null)}

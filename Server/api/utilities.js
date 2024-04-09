@@ -50,5 +50,5 @@ module.exports = {
   hashPassword,
   verifyPassword,
   generateToken,
-  verifyToken,
+  verifyToken
 };
