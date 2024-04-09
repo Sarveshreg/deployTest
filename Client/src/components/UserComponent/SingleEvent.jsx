@@ -185,12 +185,12 @@ let cancelRsvp= async ()=>{
 
     if (!eventDetail || !isMapsApiLoaded || !eventDetail.Latitude || !eventDetail.Longitude) {
       return <div>Loading...</div>; // Display a loading message or spinner
-
-    else if(!eventDetail.Date){
-      return(
-        <h3>Nothing to display here</h3>
-      )
     }
+    // if(!eventDetail.Date){
+    //   return(
+    //     <h3>Nothing to display here</h3>
+    //   )
+    // }
 
 
 
@@ -262,6 +262,7 @@ let cancelRsvp= async ()=>{
                 <Marker position={{ lat: parseFloat(eventDetail.Latitude), lng: parseFloat(eventDetail.Longitude) }} />
               </GoogleMap>
                     )}
+                    <button ><a target='_blank' href={`https://www.google.com/maps/search/?api=1&query=${eventDetail.Latitude}%2c${eventDetail.Longitude}`} >Get Direction</a></button>
         
         </span>
         }
