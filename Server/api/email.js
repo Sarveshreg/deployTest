@@ -87,10 +87,8 @@ const sendMail=async(package,action)=>{
         port: 587,
         secure: false, // Use `true` for port 465, `false` for all other ports
         auth: {
-            user: "group4eventproject@gmail.com",
-            pass: "pxgw evki qqbd ymsk",
-            // user: process.env.MASTEREMAIL,
-            // pass: process.env.EMAILPASS,
+            user: process.env.MASTEREMAIL,
+            pass: process.env.EMAILPASS,
         },
     });
     
